@@ -1,6 +1,39 @@
 <?php
 require_once '../functions.php';
 xiu_get_current_user();
+
+/**
+ *
+ */
+function add_users (){
+  if(empty($_POST['email']) || empty($_POST['slug']) || empty($_POST['nickname']) || empty($_POST['password'])){
+    $GLOBALS['message'] = '请输入完整信息';
+    $GLOBALS['success'] = false;
+    return;
+  }
+  $emailFormat = '/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/';
+  if(!preg_match($emailFormat, $_POST['email'])){
+    $GLOBALS['message'] = '请输入正确邮箱';
+    $GLOBALS['success'] = false;
+    return;
+  }
+
+  $email = $_POST['email'];
+  $slug = $_POST['slug'];
+  $nickname = $_POST['nickname'];
+  $password = $_POST['password'];
+
+  $rows =xiu_execute("insert into users (id,slug,email,nickname,password,avatar,status) values (null,'{$slug}','{$email}','{$nickname}','{$password}','/static/uploads/avatar.jpg','activated');");
+
+  $GLOBALS['success'] = $rows > 0;
+  $GLOBALS['message'] = $rows <= 0 ? "添加失败" : "添加成功";
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+  add_users();
+}
+
+$users = xiu_fetch_all("select * from users;");
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -23,12 +56,20 @@ xiu_get_current_user();
         <h1>用户</h1>
       </div>
       <!-- 有错误信息时展示 -->
-      <!-- <div class="alert alert-danger">
-        <strong>错误！</strong>发生XXX错误
-      </div> -->
+       <?php if (isset($message)): ?>
+           <?php if ($success): ?>
+             <div class="alert alert-success">
+               <strong>正确！</strong><?php echo $message ?>
+             </div>
+             <?php else: ?>
+               <div class="alert alert-danger">
+                 <strong>错误！</strong><?php echo $message ?>
+               </div>
+           <?php endif; ?>
+       <?php endif; ?>
       <div class="row">
         <div class="col-md-4">
-          <form>
+          <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" autocomplete="off" novalidate>
             <h2>添加新用户</h2>
             <div class="form-group">
               <label for="email">邮箱</label>
@@ -70,42 +111,20 @@ xiu_get_current_user();
               </tr>
             </thead>
             <tbody>
+            <?php foreach ($users as $item): ?>
               <tr>
                 <td class="text-center"><input type="checkbox"></td>
-                <td class="text-center"><img class="avatar" src="/static/assets/img/default.png"></td>
-                <td>i@zce.me</td>
-                <td>zce</td>
-                <td>汪磊</td>
-                <td>激活</td>
+                <td class="text-center"><img class="avatar" src="<?php echo $item['avatar'] ?>"></td>
+                <td><?php echo $item['email']; ?></td>
+                <td><?php echo $item['slug']; ?></td>
+                <td><?php echo $item['nickname']; ?></td>
+                <td><?php echo $item['status']; ?></td>
                 <td class="text-center">
                   <a href="post-add.php" class="btn btn-default btn-xs">编辑</a>
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+                  <a href="/admin/users-delete.php?id=<?php echo $item['id'] ?>" class="btn btn-danger btn-xs">删除</a>
                 </td>
               </tr>
-              <tr>
-                <td class="text-center"><input type="checkbox"></td>
-                <td class="text-center"><img class="avatar" src="/static/assets/img/default.png"></td>
-                <td>i@zce.me</td>
-                <td>zce</td>
-                <td>汪磊</td>
-                <td>激活</td>
-                <td class="text-center">
-                  <a href="post-add.php" class="btn btn-default btn-xs">编辑</a>
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
-              <tr>
-                <td class="text-center"><input type="checkbox"></td>
-                <td class="text-center"><img class="avatar" src="/static/assets/img/default.png"></td>
-                <td>i@zce.me</td>
-                <td>zce</td>
-                <td>汪磊</td>
-                <td>激活</td>
-                <td class="text-center">
-                  <a href="post-add.php" class="btn btn-default btn-xs">编辑</a>
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
+            <?php endforeach ?>
             </tbody>
           </table>
         </div>

@@ -11,8 +11,6 @@ function add_category(){
   $name = $_POST['name'];
   $slug = $_POST['slug'];
 
-  var_dump($name);
-  var_dump($slug);
   $rows = xiu_execute("insert into categories values (null, '{$slug}', '{$name}');");
 
   $GLOBALS['success'] = $rows > 0;
@@ -79,7 +77,8 @@ $categories = xiu_fetch_all("select * from categories;");
         <div class="col-md-8">
           <div class="page-action">
             <!-- show when multiple checked -->
-            <a id="btn_delete" class="btn btn-danger btn-sm" href="/admin/categories_delete.php" style="display: none">批量删除</a>
+<!--                                                              /admin/categories-delete.php-->
+            <a id="btn_delete" class="btn btn-danger btn-sm" href="javascript:;" style="display: none">批量删除</a>
           </div>
           <table class="table table-striped table-bordered table-hover">
             <thead>
@@ -98,7 +97,7 @@ $categories = xiu_fetch_all("select * from categories;");
                   <td><?php echo $item['slug']; ?></td>
                   <td class="text-center">
                     <a href="javascript:;" class="btn btn-info btn-xs">编辑</a>
-                    <a href="categories_delete.php?id=<?php echo $item['id'] ?>" class="btn btn-danger btn-xs">删除</a>
+                    <a href="categories-delete.php?id=<?php echo $item['id'] ?>" class="btn btn-danger btn-xs">删除</a>
                   </td>
                 </tr>
               <?php endforeach ?>
@@ -116,27 +115,21 @@ $categories = xiu_fetch_all("select * from categories;");
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
   <script type="text/javascript">
     $(function($){
-      var $tbodyCheckboxs = $('tbody input');
+      var $input = $('body input');
       var $btnDelete = $('#btn_delete');
-      var allCheckeds = [];
-      $tbodyCheckboxs.on('change',function () {
+      var checkedAll = [];
+      $input.on('change',function(){
         var id = $(this).data('id');
         if ($(this).prop('checked')) {
-          allCheckeds.push(id)
-        } else {
-          allCheckeds.splice(allCheckeds.indexOf(id), 1)
+           checkedAll.push(id);
+        }else{
+          checkedAll.splice(checkedAll.indexOf(id),1);
         }
-        allCheckeds.length ? $btnDelete.fadeIn() : $btnDelete.fadeOut();
-        $btnDelete.prop('search', '?id=' + allCheckeds);
-        /*var flag = false;
-        $tbodyCheckboxs.each(function(i,item){
-          if($(item).prop('checked')){
-            flag = true;
-          }
-          flag ? $btnDelete.fadeIn() : $btnDelete.fadeOut();
-        })*/
+        checkedAll.length ? $btnDelete.fadeIn() : $btnDelete.fadeOut();
+//        $btnDelete.prop('search','?id=' + checkedAll);
+        $btnDelete.attr('href','/admin/categories-delete.php?id=' + checkedAll);
       });
-    })
+    });
   </script>
   <script>NProgress.done()</script>
 </body>
