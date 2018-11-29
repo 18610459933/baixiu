@@ -73,7 +73,7 @@ $users = xiu_fetch_all("select * from users;");
             <h2>添加新用户</h2>
             <div class="form-group">
               <label for="email">邮箱</label>
-              <input id="email" class="form-control" name="email" type="email" placeholder="邮箱">
+              <input id="email" class="form-control" name="email" type="email" placeholder="邮箱" value="<?php echo isset($_POST['email']) ? $_POST['email'] : ''; ?>">
             </div>
             <div class="form-group">
               <label for="slug">别名</label>

@@ -1,6 +1,9 @@
 <?php
 require_once '../functions.php';
 xiu_get_current_user();
+
+$categories = xiu_fetch_all("select * from categories;");
+
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -23,9 +26,17 @@ xiu_get_current_user();
         <h1>导航菜单</h1>
       </div>
       <!-- 有错误信息时展示 -->
-      <!-- <div class="alert alert-danger">
-        <strong>错误！</strong>发生XXX错误
-      </div> -->
+      <?php if (isset($message)): ?>
+        <?php if ($success): ?>
+          <div class="alert alert-danger">
+            <strong>正确！</strong><?php echo $message ?>
+          </div>
+          <?php else: ?>
+          <div class="alert alert-danger">
+            <strong>错误！</strong><?php echo $message ?>
+          </div>
+        <?php endif; ?>
+      <?php endif; ?>
       <div class="row">
         <div class="col-md-4">
           <form>
@@ -50,7 +61,7 @@ xiu_get_current_user();
         <div class="col-md-8">
           <div class="page-action">
             <!-- show when multiple checked -->
-            <a class="btn btn-danger btn-sm" href="javascript:;" style="display: none">批量删除</a>
+            <a id="btn_delete" class="btn btn-danger btn-sm" href="javascript:;" style="display: none">批量删除</a>
           </div>
           <table class="table table-striped table-bordered table-hover">
             <thead>
@@ -63,33 +74,17 @@ xiu_get_current_user();
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td class="text-center"><input type="checkbox"></td>
-                <td><i class="fa fa-glass"></i>奇趣事</td>
-                <td>奇趣事</td>
-                <td>#</td>
-                <td class="text-center">
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
-              <tr>
-                <td class="text-center"><input type="checkbox"></td>
-                <td><i class="fa fa-phone"></i>潮科技</td>
-                <td>潮科技</td>
-                <td>#</td>
-                <td class="text-center">
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
-              <tr>
-                <td class="text-center"><input type="checkbox"></td>
-                <td><i class="fa fa-fire"></i>会生活</td>
-                <td>会生活</td>
-                <td>#</td>
-                <td class="text-center">
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
+              <?php foreach ($categories as $item): ?>
+                <tr>
+                  <td class="text-center"><input type="checkbox" data-id="<?php echo $item['id']; ?>"></td>
+                  <td><i class="fa fa-glass"><?php echo $item['slug'] ?></td>
+                  <td><?php echo $item['name'] ?></td>
+                  <td>#</td>
+                  <td class="text-center">
+                    <a href="nav-menus-delete.php?id=<?php echo $item['id'] ?>" class="btn btn-danger btn-xs">删除</a>
+                  </td>
+                </tr>
+              <?php endforeach ?>
             </tbody>
           </table>
         </div>
@@ -102,6 +97,29 @@ xiu_get_current_user();
 
   <script src="/static/assets/vendors/jquery/jquery.js"></script>
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
+  <script type="text/javascript">
+    $(function($){
+      var $input = $('body input');
+      var $btnDelete = $('#btn_delete');
+      var checkedAll = [];
+      $input.on('change',function(){
+//        console.log($(this).data('id'));
+        var id =$(this).data('id');
+        if($(this).prop('checked')){
+          checkedAll.push(id);
+        }else{
+          checkedAll.splice(checkedAll.indexOf(id),1);
+        }
+
+        checkedAll.length ? $btnDelete.fadeIn() : $btnDelete.fadeOut();
+
+//        两种方法用attr 或者 prop
+        $btnDelete.attr('href','/admin/nav-menus-delete.php?id=' + checkedAll);
+      })
+
+
+    })
+  </script>
   <script>NProgress.done()</script>
 </body>
 </html>
