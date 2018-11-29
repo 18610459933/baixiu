@@ -29,8 +29,40 @@ function add_users (){
   $GLOBALS['message'] = $rows <= 0 ? "添加失败" : "添加成功";
 }
 
+function edit_users (){
+    if(empty($_POST['email']) || empty($_POST['slug']) || empty($_POST['nickname']) || empty($_POST['password'])){
+        $GLOBALS['message'] = '请输入完整信息';
+        $GLOBALS['success'] = false;
+        return;
+    }
+    $emailFormat = '/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/';
+    if(!preg_match($emailFormat, $_POST['email'])){
+        $GLOBALS['message'] = '请输入正确邮箱';
+        $GLOBALS['success'] = false;
+        return;
+    }
+
+    $email = $_POST['email'];
+    $slug = $_POST['slug'];
+    $nickname = $_POST['nickname'];
+    $password = $_POST['password'];
+
+    $rows = xiu_execute("update users set email='{$email}',slug='{$slug}',nickname='{$nickname}',password='{$password}' where id = '{$_GET['id']}';");
+
+    $GLOBALS['success'] = $rows > 0;
+    $GLOBALS['message'] = $rows <= 0 ? "保存失败" : "保存成功";
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST'){
-  add_users();
+  if (isset($current_edit_users)){
+      add_users();
+  }else{
+      edit_users();
+  }
+}
+
+if (!empty($_GET['id'])){
+  $current_edit_users = xiu_fetch_one("select * from users where id=" . $_GET['id']);
 }
 
 $users = xiu_fetch_all("select * from users;");
@@ -69,29 +101,55 @@ $users = xiu_fetch_all("select * from users;");
        <?php endif; ?>
       <div class="row">
         <div class="col-md-4">
-          <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" autocomplete="off" novalidate>
-            <h2>添加新用户</h2>
-            <div class="form-group">
-              <label for="email">邮箱</label>
-              <input id="email" class="form-control" name="email" type="email" placeholder="邮箱" value="<?php echo isset($_POST['email']) ? $_POST['email'] : ''; ?>">
-            </div>
-            <div class="form-group">
-              <label for="slug">别名</label>
-              <input id="slug" class="form-control" name="slug" type="text" placeholder="slug">
-              <p class="help-block">https://zce.me/author/<strong>slug</strong></p>
-            </div>
-            <div class="form-group">
-              <label for="nickname">昵称</label>
-              <input id="nickname" class="form-control" name="nickname" type="text" placeholder="昵称">
-            </div>
-            <div class="form-group">
-              <label for="password">密码</label>
-              <input id="password" class="form-control" name="password" type="text" placeholder="密码">
-            </div>
-            <div class="form-group">
-              <button class="btn btn-primary" type="submit">添加</button>
-            </div>
-          </form>
+          <?php if (isset($current_edit_users)): ?>
+            <form action="<?php echo $_SERVER['PHP_SELF']; ?>?id=<?php echo $current_edit_users['id'] ?>" method="post" autocomplete="off" novalidate>
+              <h2>编辑《<?php echo $current_edit_users['nickname']; ?>》</h2>
+              <div class="form-group">
+                <label for="email">邮箱</label>
+                <input id="email" class="form-control" name="email" type="email" placeholder="邮箱" value="<?php echo $current_edit_users['email']; ?>">
+              </div>
+              <div class="form-group">
+                <label for="slug">别名</label>
+                <input id="slug" class="form-control" name="slug" type="text" placeholder="slug" value="<?php echo $current_edit_users['slug']; ?>">
+                <p class="help-block">https://zce.me/author/<strong>slug</strong></p>
+              </div>
+              <div class="form-group">
+                <label for="nickname">昵称</label>
+                <input id="nickname" class="form-control" name="nickname" type="text" placeholder="昵称" value="<?php echo $current_edit_users['nickname']; ?>">
+              </div>
+              <div class="form-group">
+                <label for="password">密码</label>
+                <input id="password" class="form-control" name="password" type="text" placeholder="密码" value="<?php echo $current_edit_users['password']; ?>">
+              </div>
+              <div class="form-group">
+                <button class="btn btn-primary" type="submit">保存</button>
+              </div>
+            </form>
+            <?php else: ?>
+            <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" autocomplete="off" novalidate>
+              <h2>添加新用户</h2>
+              <div class="form-group">
+                <label for="email">邮箱</label>
+                <input id="email" class="form-control" name="email" type="email" placeholder="邮箱" value="<?php echo isset($_POST['email']) ? $_POST['email'] : ''; ?>">
+              </div>
+              <div class="form-group">
+                <label for="slug">别名</label>
+                <input id="slug" class="form-control" name="slug" type="text" placeholder="slug">
+                <p class="help-block">https://zce.me/author/<strong>slug</strong></p>
+              </div>
+              <div class="form-group">
+                <label for="nickname">昵称</label>
+                <input id="nickname" class="form-control" name="nickname" type="text" placeholder="昵称">
+              </div>
+              <div class="form-group">
+                <label for="password">密码</label>
+                <input id="password" class="form-control" name="password" type="text" placeholder="密码">
+              </div>
+              <div class="form-group">
+                <button class="btn btn-primary" type="submit">添加</button>
+              </div>
+            </form>
+          <?php endif; ?>
         </div>
         <div class="col-md-8">
           <div class="page-action">
@@ -111,20 +169,20 @@ $users = xiu_fetch_all("select * from users;");
               </tr>
             </thead>
             <tbody>
-            <?php foreach ($users as $item): ?>
-              <tr>
-                <td class="text-center"><input type="checkbox"></td>
-                <td class="text-center"><img class="avatar" src="<?php echo $item['avatar'] ?>"></td>
-                <td><?php echo $item['email']; ?></td>
-                <td><?php echo $item['slug']; ?></td>
-                <td><?php echo $item['nickname']; ?></td>
-                <td><?php echo $item['status']; ?></td>
-                <td class="text-center">
-                  <a href="post-add.php" class="btn btn-default btn-xs">编辑</a>
-                  <a href="/admin/users-delete.php?id=<?php echo $item['id'] ?>" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
-            <?php endforeach ?>
+              <?php foreach ($users as $item): ?>
+                <tr>
+                  <td class="text-center"><input type="checkbox"></td>
+                  <td class="text-center"><img class="avatar" src="<?php echo $item['avatar']; ?>"></td>
+                  <td><?php echo $item['email']; ?></td>
+                  <td><?php echo $item['slug']; ?></td>
+                  <td><?php echo $item['nickname']; ?></td>
+                  <td><?php echo $item['status']; ?></td>
+                  <td class="text-center">
+                    <a href="/admin/users.php?id=<?php echo $item['id']; ?>" class="btn btn-default btn-xs">编辑</a>
+                    <a href="/admin/users-delete.php?id=<?php echo $item['id']; ?>" class="btn btn-danger btn-xs">删除</a>
+                  </td>
+                </tr>
+              <?php endforeach ?>
             </tbody>
           </table>
         </div>

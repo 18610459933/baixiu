@@ -16,11 +16,37 @@ function add_category(){
   $GLOBALS['success'] = $rows > 0;
   $GLOBALS['message'] = $rows <= 0 ? "添加失败" : "添加成功";
 }
+
+function edit_category(){
+    if (empty($_POST['name']) || empty($_POST['slug'])){
+        $GLOBALS['message'] = '请输入完整信息';
+        $GLOBALS['success'] = false;
+        return;
+    }
+    $name = $_POST['name'];
+    $slug = $_POST['slug'];
+
+    $rows = xiu_execute("update categories set slug = '{$slug}',name= '{$name}' where id = '{$_GET['id']}';");
+
+    $GLOBALS['success'] = $rows > 0;
+    $GLOBALS['message'] = $rows <= 0 ? "修改失败" : "修改成功";
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST'){
-  add_category();
+  if (empty($_GET['id'])){
+      add_category();
+  }else{
+      edit_category();
+  }
+}
+
+if (!empty($_GET['id'])){
+    $current_edit_categories = xiu_fetch_one("select * from categories where id = " . $_GET['id']);
 }
 
 $categories = xiu_fetch_all("select * from categories;");
+
+
 
 ?>
 
@@ -58,21 +84,39 @@ $categories = xiu_fetch_all("select * from categories;");
       <?php endif; ?>
       <div class="row">
         <div class="col-md-4">
-          <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" autocomplete="off">
-            <h2>添加新分类目录</h2>
-            <div class="form-group">
-              <label for="name">名称</label>
-              <input id="name" class="form-control" name="name" type="text" placeholder="分类名称">
-            </div>
-            <div class="form-group">
-              <label for="slug">别名</label>
-              <input id="slug" class="form-control" name="slug" type="text" placeholder="slug">
-              <p class="help-block">https://zce.me/category/<strong>slug</strong></p>
-            </div>
-            <div class="form-group">
-              <button class="btn btn-primary" type="submit">添加</button>
-            </div>
-          </form>
+          <?php if (isset($current_edit_categories)): ?>
+            <form action="<?php echo $_SERVER['PHP_SELF']; ?>?id=<?php echo $current_edit_categories['id']; ?>" method="post" autocomplete="off">
+              <h2>编辑《<?php echo $current_edit_categories['name'] ?>》</h2>
+              <div class="form-group">
+                <label for="name">名称</label>
+                <input id="name" class="form-control" name="name" type="text" placeholder="分类名称" value="<?php echo $current_edit_categories['name'] ?>">
+              </div>
+              <div class="form-group">
+                <label for="slug">别名</label>
+                <input id="slug" class="form-control" name="slug" type="text" placeholder="slug" value="<?php echo $current_edit_categories['slug'] ?>">
+                <p class="help-block">https://zce.me/category/<strong>slug</strong></p>
+              </div>
+              <div class="form-group">
+                <button class="btn btn-primary" type="submit">保存</button>
+              </div>
+            </form>
+            <?php else: ?>
+              <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" autocomplete="off">
+              <h2>添加新分类目录</h2>
+              <div class="form-group">
+                <label for="name">名称</label>
+                <input id="name" class="form-control" name="name" type="text" placeholder="分类名称">
+              </div>
+              <div class="form-group">
+                <label for="slug">别名</label>
+                <input id="slug" class="form-control" name="slug" type="text" placeholder="slug">
+                <p class="help-block">https://zce.me/category/<strong>slug</strong></p>
+              </div>
+              <div class="form-group">
+                <button class="btn btn-primary" type="submit">添加</button>
+              </div>
+            </form>
+          <?php endif; ?>
         </div>
         <div class="col-md-8">
           <div class="page-action">
@@ -83,7 +127,7 @@ $categories = xiu_fetch_all("select * from categories;");
           <table class="table table-striped table-bordered table-hover">
             <thead>
               <tr>
-                <th class="text-center" width="40"><input type="checkbox"></th>
+                <th class="text-center" width="40"><input id="input_one" type="checkbox"></th>
                 <th>名称</th>
                 <th>Slug</th>
                 <th class="text-center" width="100">操作</th>
@@ -96,8 +140,8 @@ $categories = xiu_fetch_all("select * from categories;");
                   <td><?php echo $item['name']; ?></td>
                   <td><?php echo $item['slug']; ?></td>
                   <td class="text-center">
-                    <a href="javascript:;" class="btn btn-info btn-xs">编辑</a>
-                    <a href="categories-delete.php?id=<?php echo $item['id'] ?>" class="btn btn-danger btn-xs">删除</a>
+                    <a href="/admin/categories.php?id=<?php echo $item['id'] ?>" class="btn btn-info btn-xs">编辑</a>
+                    <a href="/admin/categories-delete.php?id=<?php echo $item['id'] ?>" class="btn btn-danger btn-xs">删除</a>
                   </td>
                 </tr>
               <?php endforeach ?>
@@ -116,8 +160,12 @@ $categories = xiu_fetch_all("select * from categories;");
   <script type="text/javascript">
     $(function($){
       var $input = $('body input');
+      var $one = $('#input_one');
       var $btnDelete = $('#btn_delete');
       var checkedAll = [];
+      $one.on('change',function () {
+
+      });
       $input.on('change',function(){
         var id = $(this).data('id');
         if ($(this).prop('checked')) {
