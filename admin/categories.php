@@ -159,13 +159,15 @@ $categories = xiu_fetch_all("select * from categories;");
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
   <script type="text/javascript">
     $(function($){
-      var $input = $('body input');
-      var $one = $('#input_one');
+      var $input = $('tbody input');
+      var $theadInput = $('thead input');
       var $btnDelete = $('#btn_delete');
       var checkedAll = [];
-      $one.on('change',function () {
-
+      $theadInput.on('change',function () {
+        var $checked = $(this).prop('checked');
+        $input.prop('checked',$checked).change();
       });
+//      获取选中tbody中的checked
       $input.on('change',function(){
         var id = $(this).data('id');
         if ($(this).prop('checked')) {

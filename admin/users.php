@@ -154,7 +154,7 @@ $users = xiu_fetch_all("select * from users;");
         <div class="col-md-8">
           <div class="page-action">
             <!-- show when multiple checked -->
-            <a class="btn btn-danger btn-sm" href="javascript:;" style="display: none">批量删除</a>
+            <a id="btn_delete" class="btn btn-danger btn-sm" href="javascript:;" style="display: none">批量删除</a>
           </div>
           <table class="table table-striped table-bordered table-hover">
             <thead>
@@ -171,7 +171,7 @@ $users = xiu_fetch_all("select * from users;");
             <tbody>
               <?php foreach ($users as $item): ?>
                 <tr>
-                  <td class="text-center"><input type="checkbox"></td>
+                  <td class="text-center"><input type="checkbox" data-id="<?php echo $item['id'] ?>"></td>
                   <td class="text-center"><img class="avatar" src="<?php echo $item['avatar']; ?>"></td>
                   <td><?php echo $item['email']; ?></td>
                   <td><?php echo $item['slug']; ?></td>
@@ -195,6 +195,23 @@ $users = xiu_fetch_all("select * from users;");
 
   <script src="/static/assets/vendors/jquery/jquery.js"></script>
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
+  <script type="text/javascript">
+    $(function ($) {
+      var $input = $('body input');
+      var $btnDelete = $("#btn_delete");
+      var checkedAll = [];
+      $input.on('change',function(){
+        var id = $(this).data('id');
+        if ($(this).prop('checked')){
+          checkedAll.push(id);
+        }else{
+          checkedAll.splice(checkedAll.indexOf(id),1);
+        }
+        checkedAll.length ? $btnDelete.fadeIn() : $btnDelete.fadeOut();
+        $btnDelete.attr('href',"/admin/users-delete.php?id=" + checkedAll);
+      })
+    })
+  </script>
   <script>NProgress.done()</script>
 </body>
 </html>

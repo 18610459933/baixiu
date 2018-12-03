@@ -43,6 +43,11 @@
   if ($_SERVER['REQUEST_METHOD'] === 'POST'){
     login();
   }
+
+  //退出登录系统
+  if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && isset($_GET['action']) === "logout"){
+    unset($_SESSION['current_login_user']);
+  }
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
