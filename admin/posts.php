@@ -17,6 +17,33 @@ function convert_date($created){
   $timestamp = strtotime($created);
   return date('Y年m月d日 <b\r> H : i : s',$timestamp);
 }
+
+/*function get_category($category_id){
+  return xiu_fetch_one("select name from categories where id={$category_id}")['name'];
+}
+
+function get_users($user_id){
+  return xiu_fetch_one("select nickname from users where id={$user_id}")['nickname'];
+}*/
+$page = empty($_GET['page']) ? '1' : $_GET['page'];
+$size = 20;
+
+$offset = ($page - 1) * $size;
+
+$posts = xiu_fetch_all("select 
+	posts.id,
+	posts.title,
+	users.nickname as user_name,
+	categories.name as category_name,
+	posts.created,
+	posts.status
+from posts
+inner join categories on posts.category_id = categories.id
+inner join users on posts.user_id = users.id
+order by posts.created desc
+limit {$offset} , {$size};")
+
+
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -83,8 +110,8 @@ function convert_date($created){
             <tr>
               <td class="text-center"><input type="checkbox"></td>
               <td><?php echo $item['title']; ?></td>
-              <td><?php echo $item['user_id']; ?></td>
-              <td><?php echo $item['category_id']; ?></td>
+              <td><?php echo $item['user_name']; ?></td>
+              <td><?php echo $item['category_name']; ?></td>
               <td class="text-center"><?php echo convert_date($item['created']); ?></td>
               <td class="text-center"><?php echo convert_status($item['status']); ?></td>
               <td class="text-center">
