@@ -159,5 +159,6 @@ $held = xiu_fetch_one("select count(1) as held from comments where status = 'hel
     // 使用刚指定的配置项和数据显示图表。
     myChart.setOption(option);
   </script>
+  <script>NProgress.done()</script>
 </body>
 </html>

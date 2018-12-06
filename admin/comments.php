@@ -28,7 +28,7 @@ xiu_get_current_user();
       </div> -->
       <div class="page-action">
         <!-- show when multiple checked -->
-        <div class="btn-batch" style="display: none">
+        <div class="btn-batch pull-left" style="display: none">
           <button class="btn btn-info btn-sm">批量批准</button>
           <button class="btn btn-warning btn-sm">批量拒绝</button>
           <button class="btn btn-danger btn-sm">批量删除</button>
@@ -53,44 +53,7 @@ xiu_get_current_user();
             <th class="text-center" width="100">操作</th>
           </tr>
         </thead>
-        <tbody>
-          <tr class="danger">
-            <td class="text-center"><input type="checkbox"></td>
-            <td>大大</td>
-            <td>楼主好人，顶一个</td>
-            <td>《Hello world》</td>
-            <td>2016/10/07</td>
-            <td>未批准</td>
-            <td class="text-center">
-              <a href="post-add.php" class="btn btn-info btn-xs">批准</a>
-              <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-            </td>
-          </tr>
-          <tr>
-            <td class="text-center"><input type="checkbox"></td>
-            <td>大大</td>
-            <td>楼主好人，顶一个</td>
-            <td>《Hello world》</td>
-            <td>2016/10/07</td>
-            <td>已批准</td>
-            <td class="text-center">
-              <a href="post-add.php" class="btn btn-warning btn-xs">驳回</a>
-              <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-            </td>
-          </tr>
-          <tr>
-            <td class="text-center"><input type="checkbox"></td>
-            <td>大大</td>
-            <td>楼主好人，顶一个</td>
-            <td>《Hello world》</td>
-            <td>2016/10/07</td>
-            <td>已批准</td>
-            <td class="text-center">
-              <a href="post-add.php" class="btn btn-warning btn-xs">驳回</a>
-              <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-            </td>
-          </tr>
-        </tbody>
+        <tbody></tbody>
       </table>
     </div>
   </div>
@@ -98,8 +61,49 @@ xiu_get_current_user();
   <?php $current_page = 'comments'; ?>
   <?php include 'inc/sidebar.php'; ?>
 
-  <script src="/static/assets/vendors/jquery/jquery.js"></script>
-  <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
+  <script type="text/javascript" src="/static/assets/vendors/jquery/jquery.js"></script>
+  <script type="text/javascript" src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
+  <script type="text/javascript" src="/static/assets/vendors/jsrender/jsrender.js"></script>
+  <script id="comments_tmpl" type="text/x-jsrender">
+    {{for comments}}
+      <tr>
+        <td class="text-center"><input type="checkbox" data-id="{{:id}}"></td>
+        <td>{{:author}}</td>
+        <td>{{:content}}</td>
+        <td>《Hello world》</td>
+        <td>{{:created}}</td>
+        <td>{{:status}}</td>
+        <td class="text-center">
+          <a href="post-add.php" class="btn btn-info btn-xs">批准</a>
+          <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+        </td>
+      </tr>
+    {{/for}}
+  </script>
+  <script type="text/javascript">
+    $.get("/admin/api/comments.php",{},function (rec) {
+      var html = $("#comments_tmpl").render({
+        comments : rec
+      });
+      $('tbody').html(html);
+    })
+  </script>
+  <script type="text/javascript">
+    $(function($){
+      var $input = $('tbody input');
+      var $theadInput = $('thead input');
+      var $btnDelete = $('#btn_delete');
+      var checkedAll = [];
+      $theadInput.on('change',function () {
+        var $checked = $(this).prop('checked');
+        $('tbody input').prop('checked',$checked).change();
+      });
+//      获取选中tbody中的checked
+      $('.table').on('change',function(){
+        console.log($(this).prop("checked"));
+      });
+    });
+  </script>
   <script>NProgress.done()</script>
 </body>
 </html>
