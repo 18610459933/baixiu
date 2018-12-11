@@ -225,10 +225,16 @@ body {
   border-bottom: 1px;
 
   font-weight: 400;
+  text-align: center;
 }
 
 .main .container-fluid td {
   vertical-align: middle;
+  text-align: center;
+}
+
+.main .container-fluid tbody td:nth-child(3){
+  text-align: left;
 }
 
 .main .container-fluid td .avatar {
