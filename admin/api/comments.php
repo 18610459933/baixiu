@@ -4,7 +4,7 @@ require_once "../../functions.php";
 
 $page = empty($_GET['page']) ? 1 : intval($_GET['page']);
 
-$length = 20;
+$length = 15;
 $offset = ($page - 1) * $length;
 
 $sql = sprintf("select

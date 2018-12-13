@@ -107,13 +107,19 @@ xiu_get_current_user();
     var $headInput= $("table thead input");
     var $deleteAll = $(".deleteAll");
     var checkedAll = [];
-    var current = 1;
+    var currentPage = 1;
     function loadPage (page){
-      $.get("/admin/api/comments.php",{page:page},function (rec) {
+      $.get("/admin/api/comments.php", { page: page },function (rec) {
+        if (page > rec.total_pages){
+          loadPage(rec.total_pages);
+          return;
+        }
+        $('.pagination').twbsPagination('destroy');
         $('.pagination').twbsPagination({
           totalPages: rec.total_pages,
-          visiblePages:3,
-          initiateStartPageClick:false,
+          visiblePages: 5,
+          initiateStartPageClick: false,
+          startPage: page,
           first:'首页',
           prev:'上一页',
           next:'下一页',
@@ -125,13 +131,13 @@ xiu_get_current_user();
 //        console.log(rec);
         var html = $("#comments_tmpl").render({comments : rec.comments});
         $('tbody').html(html);
-        current = page;
+        currentPage = page;
         $('table input').prop('checked',false);
         checkedAll = [];
         checkedAll.length ? $deleteAll.fadeIn() : $deleteAll.fadeOut();
       });
     }
-    loadPage(1);
+    loadPage(currentPage);
 //    删除评论-----------------------------------------------------
     $tbody.on('click','#btn_delete',function(){
 //      获取到删除a标签和input共有的id
@@ -141,7 +147,7 @@ xiu_get_current_user();
       $.get('/admin/api/comments-delete.php',{id:id},function(res){
         if (!res) return;
 //        $tr.remove();  // 使用remove删除会遇到最后一个删除时，导致空页面
-        loadPage(current); //创建个变量接受当前页 从新加载
+        loadPage(currentPage); //创建个变量接受当前页 从新加载
       })
 
     });
